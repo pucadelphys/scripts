@@ -1,0 +1,22 @@
+#!/bin/sh
+
+wordselect() {
+    WORD="$(echo -e "\n" | dmenu -p "${1}")"
+    [[ -z ${WORD} ]] && exit
+    WORDSEL=$(dym ${3} -c $WORD | dmenu -p "${2}")
+    [[ -z ${WORDSEL} ]] && exit
+}
+
+case $1 in
+    'es')
+        wordselect "Introduzca Palabra" "Seleccione la Palabra Correcta" "-l es"
+        DEFI=$(elinks -no-numbering -no-references -dump https://dle.rae.es/${WORDSEL} | sed -n '/_\+ \[ Consultar \]/,/Real Academia Española /{/^$/d;s/^  //;/^   /d;s/\^[1-9]//;p}') ;;
+    '')
+        wordselect "Enter Word" "Select Correct Spelling"
+        DEFI=$(curl -s "dict://dict.org/d:${WORDSEL}:wn" | sed -n '5,/^\./{s/^    //;/^\.\r/d;p}') ;;
+    *)
+        notify-send 'wrong imput' ;;
+esac
+
+echo  -n ${WORDSEL} | xclip -selection clipboard
+notify-send "${DEFI}"

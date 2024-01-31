@@ -1,0 +1,27 @@
+#!/bin/sh
+
+TERM="alacritty"
+
+while getopts "asnrm:" arg; do
+    case $arg in
+        a) TERM="alacritty";;
+        s) TERM="st";;
+        n)
+        if [[ $TERM == "st" ]];then
+            INS=" -n clientswap"
+        elif [[ $TERM == "alacritty" ]]; then
+            INS=""
+        fi;;
+        m) TERM="st"
+            NAME=" -n ${OPTARG}";;
+        r) READ='TRUE'
+
+    esac
+done
+shift $((OPTIND-1))
+
+if [[ $READ == 'TRUE' ]];then
+    ${TERM}${INS} -e /bin/sh -c "cat ~/.cache/wal/newseq; ${1} ${2}; echo -en '\nEOF'; read x" 2>/dev/null
+else
+    ${TERM}${INS}${NAME} -e /bin/sh -c "cat ~/.cache/wal/newseq; ${1} ${2}" 2>/dev/null
+fi

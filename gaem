@@ -1,0 +1,54 @@
+#!/bin/sh
+
+usage() {
+    cat << EOF
+Usage: $(basename ${0}) [ -c ] [ -h ] [ -o SCREEN ] [ -r ]
+
+Available options:
+-c      Copy outputs
+-h      Print this help and exit
+-o      Turn off display SCREEN
+-r      Restore settings
+EOF
+}
+
+[[ $1 == "--help" ]] && usage && exit
+
+while getopts "hrco:" arg; do
+    case $arg in
+        o)
+            if [[ ${OPTARG} == "1" ]]; then
+                DEVICE="DVI-D-0"
+            elif [[ ${OPTARG} == "2" ]];then
+                DEVICE="HDMI-0"
+            else
+                echo "Unknown device"
+                exit 1
+            fi
+            xrandr --output ${DEVICE} --off
+            ;;
+        r)
+            xrandr --output DVI-D-0 --auto
+            xrandr --output HDMI-0 --auto --right-of DVI-D-0
+            killall pw-loopback
+            PAPE=$(grep wallpaper $HOME/memes.log | cut -d" " -f2)
+            [[ -f ${PAPE} ]] && xwallpaper --zoom ${PAPE}
+            ;;
+        c)
+            xrandr --output HDMI-0 --same-as DVI-D-0
+            ;;
+        h)
+            usage
+            exit
+            ;;
+        ?)
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+if [[ ${#} -eq 0 ]];then
+    xrandr --auto
+    pkill -x -0 pw-loopback || pw-loopback -n gameloop -C 'alsa_input.pci-0000_00_1f.3.analog-stereo' &disown
+fi

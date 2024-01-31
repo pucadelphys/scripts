@@ -1,0 +1,5 @@
+#!/bin/sh
+
+PARAM=${1}
+gcc -o "${PARAM%.c}.out" ${PARAM}
+[[ $? -ne 0 ]] && read x

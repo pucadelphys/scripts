@@ -1,0 +1,6 @@
+#!/bin/sh
+source ~/memes.log
+LOGO=$(basename ${system_background})
+neofetch --kitty ~/Pictures/icons/logos/${LOGO%%.*}.png
+LC_TIME="ko_KR.utf8" date "+ %A-%B%d일"
+exec zsh

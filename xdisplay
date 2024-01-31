@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [[ $(xclip -selection clipboard -o) =~ ^http.* ]]; then
+     mpv "--ytdl-format=bestvideo[height<=?360]" "$(xclip -selection primary -o)"
+else
+    xclip -selection clipboard -t image/png -o | display
+fi

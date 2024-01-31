@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# TR_APP_VERSION
+# TR_TIME_LOCALTIME
+# TR_TORRENT_DIR
+# TR_TORRENT_HASH
+# TR_TORRENT_ID
+# TR_TORRENT_NAME
+
+awesome-client "
+local naughty = require('naughty')
+local awful = require('awful')
+naughty.notify({ icon = '/home/alex/Pictures/icons/complete.png', title = 'Transmission-daemon', text = '$TR_TORRENT_NAME has finished downloading', run = function () awful.spawn.with_shell('pcmanfm ${TR_TORRENT_DIR}') end, timeout = 10})
+"
+canberra-gtk-play -i message-new-instant

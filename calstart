@@ -1,0 +1,14 @@
+#!/bin/sh
+
+cal
+read x
+
+[[ -z $x ]] && exit
+
+if [[ $1 -lt 1920 ]]; then
+    SHIFT=1160
+else
+    SHIFT=3080
+fi
+
+setsid -f st -n floatwin -g 66x35+$SHIFT+0 -e /bin/sh -c "cat ~/.cache/wal/sequences; cal -y; read y"

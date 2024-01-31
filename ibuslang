@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# case $(ibus engine) in
+    # xkb:us::eng)
+        # ibus engine xkb:es::spa
+        # LAN='ICAgX19fX19fCiAgfCAgX19fX3wKICB8IHxfXyAgIF9fXyBfIF9fCiAgfCAgX198IC8gX198ICBfIFwKICB8IHxfX19fXF9fIFwgfF8pIHwKICB8X19fX19ffF9fXy8gLl9fLwogICAgICAgICAgICAgfCB8CiAgICAgICAgICAgICB8X3wgICAg'
+        # ;;
+    # xkb:es::spa)
+        # ibus engine hangul
+        # LAN='IAogIF8gICAgXwogfCB8ICB8IHwKIHwgfF9ffCB8IF9fIF8gXyBfXwogfCAgX18gIHwvIF8gIHwgIF8gXAogfCB8ICB8IHwgKF98IHwgfCB8IHwKIHxffCAgfF98XF9fLF98X3wgfF98'
+        # ;;
+    # hangul)
+        # ibus engine xkb:us::eng
+        # LAN='ICBfX19fX18KIHwgIF9fX198CiB8IHxfXyAgIF8gX18gICBfXyBfCiB8ICBfX3wgfCAgXyBcIC8gXyAgfAogfCB8X19fX3wgfCB8IHwgKF98IHwKIHxfX19fX198X3wgfF98XF9fLCB8CiAgICAgICAgICAgICAgICBfXy8gfAogICAgICAgICAgICAgICB8X19fLyA='
+        # ;;
+# esac
+
+if [[ $(ibus engine) = "xkb:us::eng" ]];then 
+    ibus engine xkb:es::spa
+    LAN='ICAgX19fX19fCiAgfCAgX19fX3wKICB8IHxfXyAgIF9fXyBfIF9fCiAgfCAgX198IC8gX198ICBfIFwKICB8IHxfX19fXF9fIFwgfF8pIHwKICB8X19fX19ffF9fXy8gLl9fLwogICAgICAgICAgICAgfCB8CiAgICAgICAgICAgICB8X3wgICAg'
+else
+    ibus engine xkb:us::eng        
+    LAN='ICBfX19fX18KIHwgIF9fX198CiB8IHxfXyAgIF8gX18gICBfXyBfCiB8ICBfX3wgfCAgXyBcIC8gXyAgfAogfCB8X19fX3wgfCB8IHwgKF98IHwKIHxfX19fX198X3wgfF98XF9fLCB8CiAgICAgICAgICAgICAgICBfXy8gfAogICAgICAgICAgICAgICB8X19fLyA='
+fi
+
+COOR=$(xdotool getmouselocation --shell | grep 'X=' | cut -d"=" -f2)
+
+if [[ $COOR -lt 1920 ]]; then
+    SHIFT=834
+else
+    SHIFT=2754
+fi
+
+st -c floatwin -g 22x9+${SHIFT}+436 -e /bin/sh -c "base64 -d <<<${LAN} && sleep 0.5"
+
+xmodmap /home/alex/.Xmodmap

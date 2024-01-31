@@ -1,0 +1,67 @@
+#!/bin/sh
+
+if [[ ${#} == 0 ]]; then
+	PAPE=$(ls -d /home/alex/Pictures/papes/* | grep -i '.png\|.jpg\|.gif\|.mp4' | shuf -n1)
+elif [[ ${#} -gt 1 ]]; then
+	echo "Too many arguments"
+	exit 1
+elif [[ ${1} =~ ^(haishoku|schemer2|colorz|colorthief|wal)$ ]];then
+    PAPE=$(grep wallpaper $HOME/memes.log | cut -d" " -f2)
+    BACKEND="--backend ${1}"
+elif [[ -f ${1} ]]; then
+    PAPE="${1}"
+	[[ $PAPE = /* ]] || PAPE="${PWD}/${1}"
+elif [[ -d ${1} ]]; then
+	PAPE=$(ls -d ${1}/* | grep -i '.png\|.jpg' | shuf -n1)
+else
+    echo "No Image found"
+    exit 1
+fi
+
+sed -i "s|system_background=.*|system_background=\"${PAPE}\"|" ${HOME}/memes.log
+
+killall -q xwinwrap
+
+if [[ $PAPE =~ gif$|mp4$ ]];then
+    xwinwrap -b -nf -ov -ni -g 1920x1080+0+0 -- mpv ${PAPE} -wid WID --loop --no-audio --hwdec=auto --really-quiet &
+    xwinwrap -b -nf -ov -ni -g 1920x1080+1920+0 -- mpv ${PAPE} -wid WID --loop --no-audio --hwdec=auto --really-quiet &
+    TEMPPAPE="/tmp/$(basename $PAPE | cut -d '.' -f1).png"
+    convert "$PAPE[0]" $TEMPPAPE
+    PAPE=$TEMPPAPE
+else
+    read -r XC YC  <<< $(identify ${PAPE} | cut -d" " -f3 | tr x ' ')
+    if [[ $(bc -l <<< "scale=2;$XC/$YC") == 1.77 ]];then
+        FORMAT='--stretch'
+    elif [[ ${XC} -ge 3840 ]];then
+        FORMAT='--no-randr --zoom'
+    else
+        FORMAT='--zoom'
+    fi
+    xwallpaper ${FORMAT} ${PAPE}
+fi
+
+wal -enti ${PAPE} --cols16 ${BACKEND} > /dev/null
+truncate -s -1 /home/alex/.cache/wal/newseq
+
+xrdb -merge ~/.cache/wal/colors.Xresources
+source ~/.cache/wal/colors.sh
+
+# xrdb -merge ~/.cache/wal/colors-wal-dwm.h
+# mv ~/.cache/wal/colors_awesome.lua ~/.config/awesome
+# read -r DARK LIGHT <<< $(awk '$1=="*.color3:" || $1=="*.color7:" {print $2}' /home/alex/.cache/wal/colors.Xresources | paste -sd " " -)
+# sed -i "302s/#....../${color3}/;303s/#....../${color7}/" /home/alex/.config/dunst/dunstrc
+
+BASEPAPE="$( basename ${PAPE} | cut -d'.' -f1 ).png"
+LOGOSDIR="/home/alex/Pictures/icons/logos/"
+if [[ ! -f "${LOGOSDIR}${BASEPAPE}" ]];then
+    # SIZE=$(identify "${LOGOSDIR}outline.png" | cut -d' ' -f 3)
+    convert -size 351x369 -define gradient:center=39,340 -define gradient:radii=600,200 -define gradient:extent=maximum radial-gradient:${color1}-${color13} "${LOGOSDIR}gradient.png"
+    magick composite -compose Dst_In  -gravity center "${LOGOSDIR}outline.png" "${LOGOSDIR}gradient.png" -alpha Set "${LOGOSDIR}${BASEPAPE}"
+fi
+
+magick -size 128x128 -define gradient:center=85,35 -define gradient:extent=diagonal -define gradient:radii=90,90 radial-gradient:${color11}-${color1} ~/Documents/webdev/ChromiumPywal/sources/gradient.png
+magick ~/Documents/webdev/ChromiumPywal/sources/mask.png -alpha off ~/Documents/webdev/ChromiumPywal/sources/gradient.png +swap -compose copyalpha -composite ~/Documents/webdev/ChromiumPywal/sources/favicon.png
+
+# killall -q dunst
+
+exec ~/Documents/webdev/ChromiumPywal/generate-theme.sh

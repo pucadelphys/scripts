@@ -1,0 +1,14 @@
+#!/bin/sh
+
+pkill -0 transmission-da || transmission-daemon
+
+until $(transmission-remote -l &>/dev/null)
+do
+    sleep 0.5
+done
+
+tremc -X
+
+(cat ~/.cache/wal/sequences &)
+
+clear
