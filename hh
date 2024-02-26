@@ -27,7 +27,7 @@ while getopts "tehmu" ARG; do
         t)
             CONNECTION="alumno7@10.0.15.11" ;;
         e)
-            PORT="-p 5263" ;;
+            PORT="-p 5263 " ;;
         h)
             usage
             exit ;;
@@ -44,4 +44,4 @@ while getopts "tehmu" ARG; do
     esac
 done
 
-sshpass -f /home/alex/.ssh/cluster_pass ssh "${CONNECTION}" "${PORT}"
+sshpass -f /home/alex/.ssh/cluster_pass ssh ${PORT}${CONNECTION}

@@ -18,7 +18,6 @@ else
     exit 1
 fi
 
-sed -i "s|system_background=.*|system_background=\"${PAPE}\"|" ${HOME}/memes.log
 
 killall -q xwinwrap
 
@@ -40,6 +39,8 @@ else
     xwallpaper ${FORMAT} ${PAPE}
 fi
 
+sed -i "s|system_background=.*|system_background=\"${PAPE}\"|" ${HOME}/memes.log
+
 wal -enti ${PAPE} --cols16 ${BACKEND} > /dev/null
 truncate -s -1 /home/alex/.cache/wal/newseq
 
@@ -59,9 +60,6 @@ if [[ ! -f "${LOGOSDIR}${BASEPAPE}" ]];then
     magick composite -compose Dst_In  -gravity center "${LOGOSDIR}outline.png" "${LOGOSDIR}gradient.png" -alpha Set "${LOGOSDIR}${BASEPAPE}"
 fi
 
-magick -size 128x128 -define gradient:center=85,35 -define gradient:extent=diagonal -define gradient:radii=90,90 radial-gradient:${color11}-${color1} ~/Documents/webdev/ChromiumPywal/sources/gradient.png
-magick ~/Documents/webdev/ChromiumPywal/sources/mask.png -alpha off ~/Documents/webdev/ChromiumPywal/sources/gradient.png +swap -compose copyalpha -composite ~/Documents/webdev/ChromiumPywal/sources/favicon.png
-
 # killall -q dunst
 
-exec ~/Documents/webdev/ChromiumPywal/generate-theme.sh
+exec ~/Documents/webdev/brave_extensions/bravetheme/populate.sh
