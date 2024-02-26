@@ -2,6 +2,8 @@
 
 pkill -0 ssh-agent || (eval "$(ssh-agent -s)" && ssh-add)
 
+[[ "${#}" -ne 0 ]] && exit
+
 git add .
 git commit -m "${1}"
 git push
