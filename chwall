@@ -45,20 +45,20 @@ wal -enti ${PAPE} --cols16 ${BACKEND} > /dev/null
 truncate -s -1 /home/alex/.cache/wal/newseq
 
 xrdb -merge ~/.cache/wal/colors.Xresources
-source ~/.cache/wal/colors.sh
+# source ~/.cache/wal/colors.sh
 
 # xrdb -merge ~/.cache/wal/colors-wal-dwm.h
 # mv ~/.cache/wal/colors_awesome.lua ~/.config/awesome
 # read -r DARK LIGHT <<< $(awk '$1=="*.color3:" || $1=="*.color7:" {print $2}' /home/alex/.cache/wal/colors.Xresources | paste -sd " " -)
 # sed -i "302s/#....../${color3}/;303s/#....../${color7}/" /home/alex/.config/dunst/dunstrc
 
-BASEPAPE="$( basename ${PAPE} | cut -d'.' -f1 ).png"
-LOGOSDIR="/home/alex/Pictures/icons/logos/"
-if [[ ! -f "${LOGOSDIR}${BASEPAPE}" ]];then
-    # SIZE=$(identify "${LOGOSDIR}outline.png" | cut -d' ' -f 3)
-    convert -size 351x369 -define gradient:center=39,340 -define gradient:radii=600,200 -define gradient:extent=maximum radial-gradient:${color1}-${color13} "${LOGOSDIR}gradient.png"
-    magick composite -compose Dst_In  -gravity center "${LOGOSDIR}outline.png" "${LOGOSDIR}gradient.png" -alpha Set "${LOGOSDIR}${BASEPAPE}"
-fi
+# BASEPAPE="$( basename ${PAPE} | cut -d'.' -f1 ).png"
+# LOGOSDIR="/home/alex/Pictures/icons/logos/"
+# if [[ ! -f "${LOGOSDIR}${BASEPAPE}" ]];then
+    # # SIZE=$(identify "${LOGOSDIR}outline.png" | cut -d' ' -f 3)
+    # convert -size 351x369 -define gradient:center=39,340 -define gradient:radii=600,200 -define gradient:extent=maximum radial-gradient:${color1}-${color13} "${LOGOSDIR}gradient.png"
+    # magick composite -compose Dst_In  -gravity center "${LOGOSDIR}outline.png" "${LOGOSDIR}gradient.png" -alpha Set "${LOGOSDIR}${BASEPAPE}"
+# fi
 
 # killall -q dunst
 

@@ -17,15 +17,22 @@ Usage: hh [OPTION]
             Connect to teaching server instead
         -u
             Unmount remote home
+        -s
+            Connect to sefirot
 EOF
 }
 
-CONNECTION="abarcenas@cluster.inmegen.gob.mx"
+CONNECTION='abarcenas@cluster.inmegen.gob.mx'
+PASSFILE='/home/alex/.ssh/cluster_pass'
 
-while getopts "tehmu" ARG; do
-    case "${ARG}" in 
+while getopts "tsehmu" ARG; do
+    case "${ARG}" in
         t)
             CONNECTION="alumno7@10.0.15.11" ;;
+        s)
+            [[ ${CONNECTION} == "alumno7@10.0.15.11" ]] && (echo 'Two servers selected' && exit 1)
+            CONNECTION="abfemat@sefirot.inmegen.gob.mx"
+            PASSFILE='/home/alex/.ssh/sefi_pass' ;;
         e)
             PORT="-p 5263 " ;;
         h)
@@ -44,4 +51,4 @@ while getopts "tehmu" ARG; do
     esac
 done
 
-sshpass -f /home/alex/.ssh/cluster_pass ssh ${PORT}${CONNECTION}
+sshpass -f ${PASSFILE} ssh ${PORT}${CONNECTION}
