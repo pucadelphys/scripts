@@ -22,26 +22,30 @@ Usage: hh [OPTION]
 EOF
 }
 
-CONNECTION='abarcenas@cluster.inmegen.gob.mx'
+CONNECTION='central'
 PASSFILE='/home/alex/.ssh/cluster_pass'
 
 while getopts "tsehmu" ARG; do
     case "${ARG}" in
         t)
-            CONNECTION="alumno7@10.0.15.11" ;;
+            CONNECTION="alumno7@10.0.15.11"
+            TEACHING=true;;
         s)
-            [[ ${CONNECTION} == "alumno7@10.0.15.11" ]] && (echo 'Two servers selected' && exit 1)
-            CONNECTION="abfemat@sefirot.inmegen.gob.mx"
-            PASSFILE='/home/alex/.ssh/sefi_pass' ;;
+            [ -n "${TEACHING}" ] && echo 'Two servers selected' && exit 1
+            CONNECTION="sefirot"
+            PASSFILE='/home/alex/.ssh/sefi_pass'
+            SEFI=true ;;
         e)
-            PORT="-p 5263 " ;;
+            [ -n "${SEFI}" ] && CONNECTION='rsefirot' || CONNECTION='rcentral' ;;
         h)
             usage
             exit ;;
         m)
+            [ -n "${SEFI}" ] || [ -n "${TEACHING}" ] && echo "Can only mount from central" && exit 1
             MNT=$(findmnt -T /home/alex/mnt/cluster | grep inmegen)
             [[ -z $MNT ]] && sshpass -f /home/alex/.ssh/cluster_pass sshfs abarcenas@cluster.inmegen.gob.mx:/home/abarcenas /home/alex/mnt/cluster ;;
         u)
+            [ -n "${SEFI}" ] || [ -n "${TEACHING}" ] && echo "Can only mount from central" && exit 1
             MNT=$(findmnt -T /home/alex/mnt/cluster | grep inmegen)
             [[ -n $MNT ]] && umount /home/alex/mnt/cluster || echo 'Mount was not found'
             exit ;;
@@ -51,4 +55,4 @@ while getopts "tsehmu" ARG; do
     esac
 done
 
-sshpass -f ${PASSFILE} ssh ${PORT}${CONNECTION}
+sshpass -f ${PASSFILE} ssh ${CONNECTION}

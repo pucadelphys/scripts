@@ -1,5 +1,4 @@
 #!/bin/sh
-
 if [[ ${#} == 0 ]]; then
 	PAPE=$(ls -d /home/alex/Pictures/papes/* | grep -i '.png\|.jpg\|.gif\|.mp4' | shuf -n1)
 elif [[ ${#} -gt 1 ]]; then
@@ -22,8 +21,8 @@ fi
 killall -q xwinwrap
 
 if [[ $PAPE =~ gif$|mp4$ ]];then
-    xwinwrap -b -nf -ov -ni -g 1920x1080+0+0 -- mpv ${PAPE} -wid WID --loop --no-audio --hwdec=auto --really-quiet &
-    xwinwrap -b -nf -ov -ni -g 1920x1080+1920+0 -- mpv ${PAPE} -wid WID --loop --no-audio --hwdec=auto --really-quiet &
+    xwinwrap -b -nf -ov -ni -g 1920x1080+0+0 -- mpv ${PAPE} -wid WID --loop --no-audio --hwdec=auto --really-quiet --load-scripts=no &
+    xwinwrap -b -nf -ov -ni -g 1920x1080+1920+0 -- mpv ${PAPE} -wid WID --loop --no-audio --hwdec=auto --really-quiet --load-scripts=no &
     TEMPPAPE="/tmp/$(basename $PAPE | cut -d '.' -f1).png"
     convert "$PAPE[0]" $TEMPPAPE
     PAPE=$TEMPPAPE
@@ -39,9 +38,11 @@ else
     xwallpaper ${FORMAT} ${PAPE}
 fi
 
+echo ${PAPE}
 sed -i "s|system_background=.*|system_background=\"${PAPE}\"|" ${HOME}/memes.log
 
 wal -enti ${PAPE} --cols16 ${BACKEND} > /dev/null
+# wal -enti ${PAPE} ${BACKEND} > /dev/null
 truncate -s -1 /home/alex/.cache/wal/newseq
 
 xrdb -merge ~/.cache/wal/colors.Xresources
