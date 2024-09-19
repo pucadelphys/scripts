@@ -1,0 +1,23 @@
+#!/bin/sh
+
+LEVEL=$(< /sys/class/backlight/amdgpu_bl1/brightness)
+
+while getopts "i:d:s:" arg; do
+    case $arg in
+        i)
+            let "LEVEL= ${LEVEL} + ${OPTARG}"
+            [[ ${LEVEL} -gt 255 ]] && LEVEL=255
+            ;;
+        d)
+            let "LEVEL= ${LEVEL} - ${OPTARG}"
+            [[ ${LEVEL} -lt 1 ]] && LEVEL=1
+            ;;
+        s)
+            [[ ${OPTARG} -gt 0 ]] && [[ ${OPTARG} -le 255 ]] && LEVEL=${OPTARG}
+            ;;
+        ?)
+            exit 1
+    esac
+done
+
+echo ${LEVEL} > /sys/class/backlight/amdgpu_bl1/brightness

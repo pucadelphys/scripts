@@ -49,6 +49,8 @@ while getopts "tsehmu" ARG; do
             MNT=$(findmnt -T /home/alex/mnt/cluster | grep inmegen)
             [[ -n $MNT ]] && umount /home/alex/mnt/cluster || echo 'Mount was not found'
             exit ;;
+        c)
+            sshpass -f "/home/alex/.ssh/sefi_pass" scp ~/.cache/wal/colors.sh sefirot:~/.cache/wal ;;
         *)
             usage
             exit 1 ;;

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+NVARGS="\
+    -c 'norm G' \
+    -c startinsert! \
+    -c Goyo \
+    -c 'set ch=0' \
+    -c 'lua require(\"lualine\").hide()' \
+    "
+
+alacritty --class notesapp -e zsh -ic "nvim $NVARGS /tmp/tempnote.md"

@@ -12,15 +12,17 @@ Available options:
 EOF
 }
 
+read -rd '' SCREEN1 SCREEN2 <<<$(xrandr | grep -w connected | cut -d' ' -f1)
+
 [[ $1 == "--help" ]] && usage && exit
 
 while getopts "hrco:" arg; do
     case $arg in
         o)
             if [[ ${OPTARG} == "1" ]]; then
-                DEVICE="DVI-D-0"
+                DEVICE=${SCREEN1}
             elif [[ ${OPTARG} == "2" ]];then
-                DEVICE="HDMI-0"
+                DEVICE=${SCREEN2}
             else
                 echo "Unknown device"
                 exit 1
@@ -28,14 +30,14 @@ while getopts "hrco:" arg; do
             xrandr --output ${DEVICE} --off
             ;;
         r)
-            xrandr --output DVI-D-0 --auto
-            xrandr --output HDMI-0 --auto --right-of DVI-D-0
+            xrandr --output ${SCREEN1} --auto
+            xrandr --output ${SCREEN2} --auto --right-of ${SCREEN1}
             killall pw-loopback
             PAPE=$(grep wallpaper $HOME/memes.log | cut -d" " -f2)
             [[ -f ${PAPE} ]] && xwallpaper --zoom ${PAPE}
             ;;
         c)
-            xrandr --output HDMI-0 --same-as DVI-D-0
+            xrandr --output ${SCREEN2} --same-as ${SCREEN1}
             ;;
         h)
             usage
