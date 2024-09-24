@@ -17,6 +17,7 @@ else
     exit 1
 fi
 
+sed -i "s|system_background=.*|system_background=\"${PAPE}\"|" ${HOME}/memes.log
 
 killall -q xwinwrap
 
@@ -39,7 +40,6 @@ else
 fi
 
 echo ${PAPE}
-sed -i "s|system_background=.*|system_background=\"${PAPE}\"|" ${HOME}/memes.log
 
 wal -enti ${PAPE} --cols16 ${BACKEND} > /dev/null
 # wal -enti ${PAPE} ${BACKEND} > /dev/null

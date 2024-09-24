@@ -1,8 +1,16 @@
 #!/bin/sh
+# #cluster central
+# 'central'
+# '/home/alex/.ssh/cluster_pass'
+# #cluster enseñanza
+# "alumno7@10.0.15.11"
+# # cluster keter
+# "sefirot"
+# home/alex/.ssh/sefi_pass'
 
 usage () {
     cat << EOF
-Connect to the INMEGEN central cerver
+Connect to the INMEGEN servers
 
 Usage: hh [OPTION]
 
@@ -20,41 +28,51 @@ Usage: hh [OPTION]
         -s
             Connect to sefirot
 EOF
+    exit ${1}
 }
 
-CONNECTION='central'
-PASSFILE='/home/alex/.ssh/cluster_pass'
+TYPE='ssh'
 
-while getopts "tsehmu" ARG; do
+while getopts "tcshmue" ARG; do
     case "${ARG}" in
         t)
-            CONNECTION="alumno7@10.0.15.11"
-            TEACHING=true;;
+            [ -n "${CONNECTION}" ] && echo 'Two servers selected' && exit 1
+            CONNECTION="alumno";;
         s)
-            [ -n "${TEACHING}" ] && echo 'Two servers selected' && exit 1
-            CONNECTION="sefirot"
-            PASSFILE='/home/alex/.ssh/sefi_pass'
-            SEFI=true ;;
-        e)
-            [ -n "${SEFI}" ] && CONNECTION='rsefirot' || CONNECTION='rcentral' ;;
+            [ -n "${CONNECTION}" ] && echo 'Two servers selected' && exit 1
+            CONNECTION="central";;
         h)
-            usage
-            exit ;;
+            usage 0 ;;
         m)
-            [ -n "${SEFI}" ] || [ -n "${TEACHING}" ] && echo "Can only mount from central" && exit 1
-            MNT=$(findmnt -T /home/alex/mnt/cluster | grep inmegen)
-            [[ -z $MNT ]] && sshpass -f /home/alex/.ssh/cluster_pass sshfs abarcenas@cluster.inmegen.gob.mx:/home/abarcenas /home/alex/mnt/cluster ;;
+            TYPE='mount';;
         u)
-            [ -n "${SEFI}" ] || [ -n "${TEACHING}" ] && echo "Can only mount from central" && exit 1
-            MNT=$(findmnt -T /home/alex/mnt/cluster | grep inmegen)
-            [[ -n $MNT ]] && umount /home/alex/mnt/cluster || echo 'Mount was not found'
-            exit ;;
+            TYPE='umount';;
         c)
-            sshpass -f "/home/alex/.ssh/sefi_pass" scp ~/.cache/wal/colors.sh sefirot:~/.cache/wal ;;
+            sshpass -f "/home/alex/.ssh/sefi_pass" scp ~/.cache/wal/colors.sh sefirot:~/.cache/wal
+            exit 0 ;;
+        e)
+            EXTERNAL=true;;
         *)
-            usage
-            exit 1 ;;
+            usage 1 ;;
     esac
 done
 
-sshpass -f ${PASSFILE} ssh ${CONNECTION}
+shift  $(( $OPTIND -1 ))
+
+[ "${1}" == "--help" ] && usage 0
+[ ${#} -ne 0 ] && usage 1
+
+[ -z ${CONNECTION} ] && CONNECTION='sefirot'
+
+PASSFILE=~/.ssh/${CONNECTION}_pass
+
+[ -n "${EXTERNAL}" ] && CONNECTION="r${CONNECTION}"
+
+if [ "${TYPE}" == "ssh" ];then
+    sshpass -f ${PASSFILE} ssh ${CONNECTION}
+elif [ "${TYPE}" == "mount" ]; then
+    sshfs "${CONNECTION}:~/external" "/home/alex/mnt/cluster"
+elif [ "${TYPE}" == "umount" ]; then
+    [ "$(findmnt -T /home/alex/mnt/cluster | grep -q fuse.sshfs)" ] && (echo 'No mount found'; exit 1)
+    umount /home/alex/mnt/cluster
+fi
