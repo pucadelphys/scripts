@@ -31,7 +31,6 @@ EOF
     exit ${1}
 }
 
-TYPE='ssh'
 
 while getopts "tcshmue" ARG; do
     case "${ARG}" in
@@ -44,12 +43,14 @@ while getopts "tcshmue" ARG; do
         h)
             usage 0 ;;
         m)
+            [ -n "${TYPE}" ] && echo 'Too many options' && usage 1
             TYPE='mount';;
         u)
+            [ -n "${TYPE}" ] && echo 'Too many options' && usage 1
             TYPE='umount';;
         c)
-            sshpass -f "/home/alex/.ssh/sefi_pass" scp ~/.cache/wal/colors.sh sefirot:~/.cache/wal
-            exit 0 ;;
+            [ -n "${TYPE}" ] && echo 'Too many options' && usage 1
+            TYPE='colors';;
         e)
             EXTERNAL=true;;
         *)
@@ -62,6 +63,7 @@ shift  $(( $OPTIND -1 ))
 [ "${1}" == "--help" ] && usage 0
 [ ${#} -ne 0 ] && usage 1
 
+[ -z ${TYPE} ] && TYPE='ssh'
 [ -z ${CONNECTION} ] && CONNECTION='sefirot'
 
 PASSFILE=~/.ssh/${CONNECTION}_pass
@@ -71,8 +73,12 @@ PASSFILE=~/.ssh/${CONNECTION}_pass
 if [ "${TYPE}" == "ssh" ];then
     sshpass -f ${PASSFILE} ssh ${CONNECTION}
 elif [ "${TYPE}" == "mount" ]; then
-    sshfs "${CONNECTION}:~/external" "/home/alex/mnt/cluster"
+    [ ! -d ~/mnt/cluster ] && mkdir -p ~/mnt/cluster
+    sshpass -f ${PASSFILE} ssh ${CONNECTION} "[ ! -d ~/external ] && mkdir ~/external"
+    sshfs -o allow_other,default_permissions,ssh_command="sshpass -f ~/.ssh/sefirot_pass ssh" ${CONNECTION}':external' "/home/alex/mnt/cluster"
 elif [ "${TYPE}" == "umount" ]; then
     [ "$(findmnt -T /home/alex/mnt/cluster | grep -q fuse.sshfs)" ] && (echo 'No mount found'; exit 1)
     umount /home/alex/mnt/cluster
+elif [ "${TYPE}" == "colors" ]; then
+    sshpass -f ${PASSFILE} scp ~/.cache/wal/colors.sh ${CONNECTION}:~/.cache/wal
 fi
