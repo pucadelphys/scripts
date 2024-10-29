@@ -25,7 +25,7 @@ if [[ $PAPE =~ gif$|mp4$ ]];then
     xwinwrap -b -nf -ov -ni -g 1920x1080+0+0 -- mpv ${PAPE} -wid WID --loop --no-audio --hwdec=auto --really-quiet --load-scripts=no &
     xwinwrap -b -nf -ov -ni -g 1920x1080+1920+0 -- mpv ${PAPE} -wid WID --loop --no-audio --hwdec=auto --really-quiet --load-scripts=no &
     TEMPPAPE="/tmp/$(basename $PAPE | cut -d '.' -f1).png"
-    convert "$PAPE[0]" $TEMPPAPE
+    magick convert "$PAPE[0]" $TEMPPAPE
     PAPE=$TEMPPAPE
 else
     read -r XC YC  <<< $(identify ${PAPE} | cut -d" " -f3 | tr x ' ')
