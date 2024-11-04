@@ -34,7 +34,7 @@ EOF
 
 
 # while getopts "tcshmue" ARG; do
-while getopts "tfcshmudp:j" ARG; do
+while getopts "tfcs:hmudpnw" ARG; do
     case "${ARG}" in
         f)
             [ -n "${CONNECTION}" ] && echo 'You may only specify one server' && exit 1
@@ -42,7 +42,7 @@ while getopts "tfcshmudp:j" ARG; do
         d)
             [ -n "${CONNECTION}" ] && echo 'You may only specify one server' && exit 1
             CONNECTION="drona";;
-        s)
+        c)
             [ -n "${CONNECTION}" ] && echo 'You may only specify one server' && exit 1
             CONNECTION="central";;
         h)
@@ -53,17 +53,21 @@ while getopts "tfcshmudp:j" ARG; do
         u)
             [ -n "${TYPE}" ] && echo 'You may only specify one -muc' && usage 1
             TYPE='umount';;
-        c)
+        w)
             [ -n "${TYPE}" ] && echo 'You may only specify one -muc' && usage 1
             TYPE='colors';;
         # e)
             # EXTERNAL=true;;
         p)
+
+            [ -n "${TYPE}" ] && echo 'You may only specify one -muc' && usage 1
+            TYPE='password';;
+        s)
             [ -n "${TYPE}" ] && echo 'You may only specify one -muc' && usage 1
             INLOC=${OPTARG##*:}
             OUTLOC=${OPTARG%%:*}
             TYPE='paste';;
-        j)
+        n)
             [ -n "${TYPE}" ] && echo 'The j flag is for standard connections only' && usage 1
             JUPYTER=true;;
         *)
@@ -97,6 +101,8 @@ elif [ "${TYPE}" == "mount" ]; then
 elif [ "${TYPE}" == "umount" ]; then
     [ "$(findmnt -T /home/alex/mnt/cluster | grep -q fuse.sshfs)" ] && (echo 'No mount found'; exit 1)
     umount /home/alex/mnt/cluster
+elif [ "${TYPE}" == "password" ]; then
+    cat ${PASSFILE} | xclip -sel clip
 elif [ "${TYPE}" == "colors" ]; then
     sshpass -f ${PASSFILE} scp ~/.cache/wal/colors.sh ${CONNECTION}:~/.cache/wal
 fi
