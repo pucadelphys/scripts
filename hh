@@ -79,7 +79,7 @@ shift  $(( $OPTIND -1 ))
 [ -z ${TYPE} ] && TYPE='ssh'
 [ -z ${CONNECTION} ] && CONNECTION='sefirot'
 
-PASSFILE=~/.ssh/${CONNECTION}_pass
+PASSFILE=~/.ssh/secrets/${CONNECTION}_pass
 
 DEFAULT_HOST=$(ip route | grep default -m 1 | cut -d' ' -f 3)
 echo -e "Default host is: \033[1m${DEFAULT_HOST}\033[0m"
