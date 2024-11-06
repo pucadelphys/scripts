@@ -1,12 +1,7 @@
 #!/bin/sh
-# #cluster central
-# 'central'
-# '/home/alex/.ssh/cluster_pass'
+
 # #cluster enseñanza
-# "alumno7@10.0.15.11"
-# # cluster keter
-# "sefirot"
-# home/alex/.ssh/sefi_pass'
+# "alumnoX@10.0.15.11"
 
 usage () {
 
@@ -28,12 +23,17 @@ Usage: hh [OPTION]
             Connect to drona server
         -f
             Connect to fenix server
+        -c
+            Connect to central server
+        -p
+            Copy server password
+        -n
+            Open connection for remote notebook
 EOF
     exit ${1}
 }
 
 
-# while getopts "tcshmue" ARG; do
 while getopts "tfcs:hmudpnw" ARG; do
     case "${ARG}" in
         f)
@@ -45,31 +45,27 @@ while getopts "tfcs:hmudpnw" ARG; do
         c)
             [ -n "${CONNECTION}" ] && echo 'You may only specify one server' && exit 1
             CONNECTION="central";;
-        h)
-            usage ;;
+        w)
+            WAL=true ;;
         m)
-            [ -n "${TYPE}" ] && echo 'You may only specify one -muc' && usage 1
+            [ -n "${TYPE}" ] && echo 'You may only specify one -mups' && usage 1
             TYPE='mount';;
         u)
-            [ -n "${TYPE}" ] && echo 'You may only specify one -muc' && usage 1
+            [ -n "${TYPE}" ] && echo 'You may only specify one -mups' && usage 1
             TYPE='umount';;
-        w)
-            [ -n "${TYPE}" ] && echo 'You may only specify one -muc' && usage 1
-            TYPE='colors';;
-        # e)
-            # EXTERNAL=true;;
         p)
-
-            [ -n "${TYPE}" ] && echo 'You may only specify one -muc' && usage 1
+            [ -n "${TYPE}" ] && echo 'You may only specify one -mups' && usage 1
             TYPE='password';;
         s)
-            [ -n "${TYPE}" ] && echo 'You may only specify one -muc' && usage 1
+            [ -n "${TYPE}" ] && echo 'You may only specify one -mups' && usage 1
             INLOC=${OPTARG##*:}
             OUTLOC=${OPTARG%%:*}
             TYPE='paste';;
         n)
             [ -n "${TYPE}" ] && echo 'The j flag is for standard connections only' && usage 1
             JUPYTER=true;;
+        h)
+            usage ;;
         *)
             usage 1 ;;
     esac
@@ -88,21 +84,20 @@ PASSFILE=~/.ssh/secrets/${CONNECTION}_pass
 DEFAULT_HOST=$(ip route | grep default -m 1 | cut -d' ' -f 3)
 echo -e "Default host is: \033[1m${DEFAULT_HOST}\033[0m"
 [[ "${DEFAULT_HOST}" =~ 192.168.(60.1|17.254|105.254) ]] || CONNECTION="r${CONNECTION}"
-# [ -n "${EXTERNAL}" ] && CONNECTION="r${CONNECTION}"
 
+[ -n "${WAL}" ] && sshpass -f ${PASSFILE} scp ~/.cache/wal/colors.sh ${CONNECTION}:~/.cache/wal
 
-if [ "${TYPE}" == "ssh" ];then
-    [[ "${CONNECTION}" == "rdrona" ]] && echo "Drona can be accessed only from the INMEGEN network" && exit
-    sshpass -f ${PASSFILE} ssh ${JUPYTER:+-L 8080:127.0.0.1:8080 }${CONNECTION}
-elif [ "${TYPE}" == "mount" ]; then
-    [ ! -d ~/mnt/cluster ] && mkdir -p ~/mnt/cluster
-    sshpass -f ${PASSFILE} ssh ${CONNECTION} "[ ! -d ~/external ] && mkdir ~/external"
-    sshfs -o allow_other,default_permissions,ssh_command="sshpass -f /home/alex/.ssh/sefirot_pass ssh" ${CONNECTION}':external' "/home/alex/mnt/cluster"
-elif [ "${TYPE}" == "umount" ]; then
-    [ "$(findmnt -T /home/alex/mnt/cluster | grep -q fuse.sshfs)" ] && (echo 'No mount found'; exit 1)
-    umount /home/alex/mnt/cluster
-elif [ "${TYPE}" == "password" ]; then
-    cat ${PASSFILE} | xclip -sel clip
-elif [ "${TYPE}" == "colors" ]; then
-    sshpass -f ${PASSFILE} scp ~/.cache/wal/colors.sh ${CONNECTION}:~/.cache/wal
-fi
+case "${TYPE}" in
+    ssh)
+        [[ "${CONNECTION}" == "rdrona" ]] && echo "Drona can be accessed only from the INMEGEN network" && exit
+        sshpass -f ${PASSFILE} ssh ${JUPYTER:+-L 8080:127.0.0.1:8080 }${CONNECTION} ;;
+    mount)
+        [ ! -d ~/mnt/cluster ] && mkdir -p ~/mnt/cluster
+        sshpass -f ${PASSFILE} ssh ${CONNECTION} "[ ! -d ~/external ] && mkdir ~/external"
+        sshfs -o allow_other,default_permissions,ssh_command="sshpass -f /home/alex/.ssh/sefirot_pass ssh" ${CONNECTION}':external' "/home/alex/mnt/cluster" ;;
+    umount)
+        [ "$(findmnt -T /home/alex/mnt/cluster | grep -q fuse.sshfs)" ] && (echo 'No mount found'; exit 1)
+        umount /home/alex/mnt/cluster ;;
+    password)
+        cat ${PASSFILE} | xclip -sel clip ;;
+esac
