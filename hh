@@ -95,7 +95,7 @@ echo -e "Default host is: \033[1m${DEFAULT_HOST}\033[0m"
 case "${TYPE}" in
     ssh)
         [[ "${CONNECTION}" == "rdrona" ]] && echo "Drona can be accessed only from the INMEGEN network" && exit
-        sshpass -f ${PASSFILE} ssh ${JUPYTER:+-L 8080:127.0.0.1:8080 }${R_SOCKET:+-L 8070:127.0.0.1:8070 }${CONNECTION} ;;
+        sshpass -f ${PASSFILE} ssh ${JUPYTER:+-L 8080:127.0.0.1:8080 }${R_SOCKET:+-q -L 8070:127.0.0.1:8070 }${CONNECTION} ;;
     mount)
         [ ! -d ~/mnt/cluster ] && mkdir -p ~/mnt/cluster
         sshpass -f ${PASSFILE} ssh ${CONNECTION} "[ ! -d ~/external ] && mkdir ~/external"
