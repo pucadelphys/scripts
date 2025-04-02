@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # #cluster enseñanza
 # "alumnoX@10.0.15.11"
