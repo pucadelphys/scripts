@@ -29,12 +29,14 @@ Usage: hh [OPTION]
             Copy server password
         -n
             Open connection for remote notebook
+        -r
+            Open connection with R socket
 EOF
     exit ${1}
 }
 
 
-while getopts "tfcs:hmudpnw" ARG; do
+while getopts "tfcs:hmudpnwr" ARG; do
     case "${ARG}" in
         f)
             [ -n "${CONNECTION}" ] && echo 'You may only specify one server' && exit 1
@@ -64,6 +66,9 @@ while getopts "tfcs:hmudpnw" ARG; do
         n)
             [ -n "${TYPE}" ] && echo 'The j flag is for standard connections only' && usage 1
             JUPYTER=true;;
+        r)
+            [ -n "${TYPE}" ] && echo 'The r flag is for standard connections only' && usage 1
+            R_SOCKET=true;;
         h)
             usage ;;
         *)
@@ -90,7 +95,7 @@ echo -e "Default host is: \033[1m${DEFAULT_HOST}\033[0m"
 case "${TYPE}" in
     ssh)
         [[ "${CONNECTION}" == "rdrona" ]] && echo "Drona can be accessed only from the INMEGEN network" && exit
-        sshpass -f ${PASSFILE} ssh ${JUPYTER:+-L 8080:127.0.0.1:8080 }${CONNECTION} ;;
+        sshpass -f ${PASSFILE} ssh ${JUPYTER:+-L 8080:127.0.0.1:8080 }${R_SOCKET:+-L 8070:127.0.0.1:8070 }${CONNECTION} ;;
     mount)
         [ ! -d ~/mnt/cluster ] && mkdir -p ~/mnt/cluster
         sshpass -f ${PASSFILE} ssh ${CONNECTION} "[ ! -d ~/external ] && mkdir ~/external"
